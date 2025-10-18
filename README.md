@@ -14,7 +14,7 @@ Create a single Python FastAPI project that:
 
 ## ⚙️ Tech Stack
 
-- Python 3.11.9
+- Python 3.9.15
 - FastAPI
 - Uvicorn
 - Pydantic
@@ -74,42 +74,24 @@ Alternatively, you can use the render.yaml file:
 
 ## 🔧 Troubleshooting Deployment Issues
 
-If you encounter deployment errors like "INTERNAL_SERVER_ERROR" or "FUNCTION_INVOCATION_FAILED":
+If you encounter deployment errors:
 
-1. **Check the logs**: In Render, go to your service dashboard and check the logs for specific error messages
-2. **Verify dependencies**: Ensure all dependencies in requirements.txt are compatible
-3. **Check the start command**: Make sure it matches the Procfile
-4. **Environment variables**: Verify that the PORT environment variable is being used correctly
+1. **Use the simplest configuration**: This repo is configured with the most compatible versions
+2. **Check the logs**: In Render, go to your service dashboard and check the logs for specific error messages
+3. **Verify dependencies**: The requirements.txt uses version ranges that are known to work
+4. **Environment variables**: The application correctly uses the PORT environment variable
 
-### Python Version Compatibility Issues
-
-If you see errors like:
-```
-ValueError: 'not' is not a valid parameter
-```
-
-This is caused by incompatibility between Python 3.13 and older versions of FastAPI/Pydantic. To fix this:
-
-1. Use Python 3.11.9 as specified in runtime.txt
-2. Use compatible versions of FastAPI and Pydantic as specified in requirements.txt
-
-### Compilation Error Fixes (httptools/parser/parser.c:212:12: fatal error)
+### Common Deployment Issues
 
 If you see errors like:
 ```
-httptools/parser/parser.c:212:12: fatal error: longintrepr.h: No such file or directory
-compilation terminated.
-error: command '/usr/bin/gcc' failed with exit code 1
+error: metadata-generation-failed
 ```
 
-This is caused by trying to compile C extensions during installation. To fix this:
-
-1. Use the specific versions in requirements.txt (already set in this repo)
-2. Use Python 3.11.9 as specified in runtime.txt
-3. If the issue persists, try adding these build dependencies to your Render environment:
-   ```
-   apt-get update && apt-get install -y build-essential python3-dev
-   ```
+This is often caused by trying to install incompatible package versions. This repo uses:
+- Python 3.9.15 (most compatible with Render)
+- Version ranges in requirements.txt that are known to work together
+- A simple build process that upgrades pip first
 
 ## 🧩 Endpoints
 
