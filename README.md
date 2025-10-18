@@ -71,6 +71,20 @@ Alternatively, you can use the render.yaml file:
 4. Connect your GitHub repository
 5. Render will automatically detect the render.yaml file and configure the service
 
+## 🔧 Troubleshooting Deployment Issues
+
+If you encounter deployment errors like "INTERNAL_SERVER_ERROR" or "FUNCTION_INVOCATION_FAILED":
+
+1. **Check the logs**: In Render, go to your service dashboard and check the logs for specific error messages
+2. **Verify dependencies**: Ensure all dependencies in requirements.txt are compatible
+3. **Check the start command**: Make sure it matches the Procfile
+4. **Environment variables**: Verify that the PORT environment variable is being used correctly
+
+Common fixes:
+- Downgrade FastAPI version in requirements.txt if there are compatibility issues
+- Ensure all imports in main.py are properly handled with try/except blocks
+- Check that the application listens on 0.0.0.0 and uses the PORT environment variable
+
 ## 🧩 Endpoints
 
 All endpoints return simulated data without any external dependencies:

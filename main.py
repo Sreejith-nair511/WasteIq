@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,8 +7,17 @@ from typing import List, Optional, Dict, Any, Union
 import uuid
 import random
 from datetime import datetime, timedelta
-from faker import Faker
-import json
+try:
+    from faker import Faker
+    fake = Faker()
+except ImportError:
+    # Fallback if faker is not available
+    fake = None
+    logging.warning("Faker not available, using simple random data")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="WasteIQ Simulated Backend", 
               description="Simulated backend for WasteIQ — returns mock responses, ideal for frontend testing.",
@@ -21,8 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-fake = Faker()
 
 # Pydantic models for request/response bodies
 class RegisterRequest(BaseModel):
@@ -156,13 +164,22 @@ class DashboardMetricsResponse(BaseModel):
 
 # Helper functions for generating mock data
 def generate_mock_token():
-    return f"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{fake.sha256()[:20]}.{fake.sha256()[:20]}"
+    if fake:
+        return f"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{fake.sha256()[:20]}.{fake.sha256()[:20]}"
+    else:
+        return f"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.randomtokenpart1.randomtokenpart2"
 
 def generate_user_id():
-    return f"user_{fake.uuid4()[:8]}"
+    if fake:
+        return f"user_{fake.uuid4()[:8]}"
+    else:
+        return f"user_{uuid.uuid4().hex[:8]}"
 
 def generate_job_id():
-    return f"job_{fake.uuid4()[:8]}"
+    if fake:
+        return f"job_{fake.uuid4()[:8]}"
+    else:
+        return f"job_{uuid.uuid4().hex[:8]}"
 
 def get_random_waste_type():
     waste_types = ["organic", "plastic", "metal", "glass", "paper", "electronic", "hazardous"]
@@ -186,65 +203,74 @@ mock_notifications = []
 
 # Initialize mock data
 def initialize_mock_data():
-    # Generate mock collections
-    for _ in range(50):
-        waste_types = ["organic", "plastic", "metal", "glass", "paper"]
-        breakdown = {}
-        total = 0
-        for wt in waste_types:
-            amount = round(random.uniform(100, 1000), 2)
-            breakdown[wt] = amount
-            total += amount
+    try:
+        # Generate mock collections
+        for _ in range(50):
+            waste_types = ["organic", "plastic", "metal", "glass", "paper"]
+            breakdown = {}
+            total = 0
+            for wt in waste_types:
+                amount = round(random.uniform(100, 1000), 2)
+                breakdown[wt] = amount
+                total += amount
+            
+            mock_collections.append({
+                "collection_id": generate_job_id(),
+                "ward": generate_ward_name(),
+                "date": (datetime.now() - timedelta(days=random.randint(0, 30))).strftime("%Y-%m-%d"),
+                "total_weight": round(total, 2),
+                "waste_breakdown": breakdown,
+                "collector": fake.name() if fake else f"Collector {random.randint(1, 100)}",
+                "status": random.choice(["completed", "in_progress", "scheduled"])
+            })
         
-        mock_collections.append({
-            "collection_id": generate_job_id(),
-            "ward": generate_ward_name(),
-            "date": (datetime.now() - timedelta(days=random.randint(0, 30))).strftime("%Y-%m-%d"),
-            "total_weight": round(total, 2),
-            "waste_breakdown": breakdown,
-            "collector": fake.name(),
-            "status": random.choice(["completed", "in_progress", "scheduled"])
-        })
-    
-    # Generate mock vehicles
-    for i in range(20):
-        mock_vehicles.append({
-            "vehicle_id": generate_vehicle_id(),
-            "location": {
-                "lat": round(random.uniform(12.9, 13.1), 6),
-                "lng": round(random.uniform(77.5, 77.7), 6)
-            },
-            "status": random.choice(["active", "idle", "maintenance"]),
-            "last_updated": (datetime.now() - timedelta(minutes=random.randint(0, 120))).isoformat() + "Z",
-            "route_progress": round(random.uniform(0, 100), 2)
-        })
-    
-    # Generate mock users
-    roles = ["admin", "operator", "supervisor", "manager", "analyst"]
-    for i in range(30):
-        mock_users.append({
-            "id": generate_user_id(),
-            "name": fake.name(),
-            "email": fake.email(),
-            "role": random.choice(roles),
-            "status": random.choice(["active", "inactive"]),
-            "last_login": (datetime.now() - timedelta(days=random.randint(0, 30))).isoformat() + "Z"
-        })
-    
-    # Generate mock notifications
-    notification_types = ["alert", "info", "warning", "success"]
-    for i in range(15):
-        mock_notifications.append({
-            "id": generate_job_id(),
-            "title": fake.sentence(nb_words=4),
-            "message": fake.sentence(nb_words=10),
-            "timestamp": (datetime.now() - timedelta(hours=random.randint(0, 48))).isoformat() + "Z",
-            "read": random.choice([True, False]),
-            "type": random.choice(notification_types)
-        })
+        # Generate mock vehicles
+        for i in range(20):
+            mock_vehicles.append({
+                "vehicle_id": generate_vehicle_id(),
+                "location": {
+                    "lat": round(random.uniform(12.9, 13.1), 6),
+                    "lng": round(random.uniform(77.5, 77.7), 6)
+                },
+                "status": random.choice(["active", "idle", "maintenance"]),
+                "last_updated": (datetime.now() - timedelta(minutes=random.randint(0, 120))).isoformat() + "Z",
+                "route_progress": round(random.uniform(0, 100), 2)
+            })
+        
+        # Generate mock users
+        roles = ["admin", "operator", "supervisor", "manager", "analyst"]
+        for i in range(30):
+            mock_users.append({
+                "id": generate_user_id(),
+                "name": fake.name() if fake else f"User {random.randint(1, 100)}",
+                "email": fake.email() if fake else f"user{random.randint(1, 100)}@example.com",
+                "role": random.choice(roles),
+                "status": random.choice(["active", "inactive"]),
+                "last_login": (datetime.now() - timedelta(days=random.randint(0, 30))).isoformat() + "Z"
+            })
+        
+        # Generate mock notifications
+        notification_types = ["alert", "info", "warning", "success"]
+        for i in range(15):
+            mock_notifications.append({
+                "id": generate_job_id(),
+                "title": fake.sentence(nb_words=4) if fake else f"Notification {i+1}",
+                "message": fake.sentence(nb_words=10) if fake else f"This is notification message {i+1}",
+                "timestamp": (datetime.now() - timedelta(hours=random.randint(0, 48))).isoformat() + "Z",
+                "read": random.choice([True, False]),
+                "type": random.choice(notification_types)
+            })
+        
+        logger.info("Mock data initialized successfully")
+    except Exception as e:
+        logger.error(f"Error initializing mock data: {e}")
 
 # Initialize mock data on startup
-initialize_mock_data()
+try:
+    initialize_mock_data()
+    logger.info("Application initialized successfully")
+except Exception as e:
+    logger.error(f"Error during application initialization: {e}")
 
 # AUTH ENDPOINTS
 @app.post("/api/v1/auth/register", response_model=RegisterResponse)
@@ -277,7 +303,7 @@ async def login_user(request: LoginRequest):
         token=token,
         user={
             "id": user_id,
-            "name": fake.name(),
+            "name": fake.name() if fake else "Test User",
             "email": request.email,
             "role": random.choice(["admin", "operator", "supervisor"])
         }
@@ -378,7 +404,7 @@ async def add_industrial_listing(request: IndustrialListingRequest):
     Add a mock industrial waste listing.
     Returns a simulated embedding score.
     """
-    listing_id = f"listing_{fake.uuid4()[:8]}"
+    listing_id = generate_job_id()
     
     return {
         "id": listing_id,
@@ -555,7 +581,7 @@ async def create_waste_collection(request: WasteCollectionRequest):
         "date": request.date,
         "total_weight": round(total, 2),
         "waste_breakdown": breakdown,
-        "collector": fake.name(),
+        "collector": fake.name() if fake else f"Collector {random.randint(1, 100)}",
         "status": "completed"
     }
     
@@ -713,9 +739,15 @@ async def get_dashboard_metrics():
 @app.get("/")
 async def root():
     return {"message": "WasteIQ Simulated Backend is running!", 
-            "docs": "http://127.0.0.1:8000/docs"}
+            "docs": "/docs"}
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    logger.info(f"Starting server on port {port}")
+    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info")
