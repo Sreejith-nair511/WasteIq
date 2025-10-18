@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple build script for Render deployment
+# Build script for Render deployment
 
 # Upgrade pip first
 pip install --upgrade pip

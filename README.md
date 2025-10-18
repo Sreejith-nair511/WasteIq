@@ -14,7 +14,7 @@ Create a single Python FastAPI project that:
 
 ## ⚙️ Tech Stack
 
-- Python 3.9.15
+- Python 3.11.9
 - FastAPI
 - Uvicorn
 - Pydantic
@@ -76,22 +76,21 @@ Alternatively, you can use the render.yaml file:
 
 If you encounter deployment errors:
 
-1. **Use the simplest configuration**: This repo is configured with the most compatible versions
+1. **Use the correct Python version**: This repo uses Python 3.11.9 which is compatible with all dependencies
 2. **Check the logs**: In Render, go to your service dashboard and check the logs for specific error messages
-3. **Verify dependencies**: The requirements.txt uses version ranges that are known to work
+3. **Verify dependencies**: The requirements.txt includes all necessary packages including python-multipart
 4. **Environment variables**: The application correctly uses the PORT environment variable
 
 ### Common Deployment Issues
 
 If you see errors like:
 ```
-error: metadata-generation-failed
+Form data requires "python-multipart" to be installed
 ```
 
-This is often caused by trying to install incompatible package versions. This repo uses:
-- Python 3.9.15 (most compatible with Render)
-- Version ranges in requirements.txt that are known to work together
-- A simple build process that upgrades pip first
+This means the python-multipart package is missing. This repo includes it in requirements.txt.
+
+If you see Python version compatibility errors, make sure Render is using Python 3.11.9 as specified in runtime.txt.
 
 ## 🧩 Endpoints
 
