@@ -26,10 +26,14 @@ Create a single Python FastAPI project that:
 wasteiq_sim/
  ├── main.py
  ├── requirements.txt
+ ├── runtime.txt
+ ├── Procfile
+ ├── render.yaml
+ ├── .gitignore
  └── README.md
 ```
 
-## 🚀 Setup
+## 🚀 Local Setup
 
 1. Install dependencies:
 ```bash
@@ -43,6 +47,29 @@ uvicorn main:app --reload
 
 3. Open the API documentation:
 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+## ☁️ Deploy to Render
+
+1. Fork this repository to your GitHub account
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Click "New" and select "Web Service"
+4. Connect your GitHub repository
+5. Configure the service:
+   - Name: wasteiq-backend
+   - Environment: Python 3
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Auto-deploy: Yes
+6. Click "Create Web Service"
+
+Render will automatically deploy your application and provide a public URL.
+
+Alternatively, you can use the render.yaml file:
+1. Fork this repository to your GitHub account
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Click "New" and select "Blueprint"
+4. Connect your GitHub repository
+5. Render will automatically detect the render.yaml file and configure the service
 
 ## 🧩 Endpoints
 

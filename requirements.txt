@@ -1,4 +1,4 @@
-fastapi
-uvicorn
-pydantic
-faker
+fastapi==0.115.7
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+faker==37.11.0
