@@ -14,7 +14,7 @@ Create a single Python FastAPI project that:
 
 ## ⚙️ Tech Stack
 
-- Python 3.9.15
+- Python 3.11.9
 - FastAPI
 - Uvicorn
 - Pydantic
@@ -29,6 +29,7 @@ wasteiq_sim/
  ├── runtime.txt
  ├── Procfile
  ├── render.yaml
+ ├── build.sh
  ├── .gitignore
  └── README.md
 ```
@@ -80,10 +81,17 @@ If you encounter deployment errors like "INTERNAL_SERVER_ERROR" or "FUNCTION_INV
 3. **Check the start command**: Make sure it matches the Procfile
 4. **Environment variables**: Verify that the PORT environment variable is being used correctly
 
-Common fixes:
-- Downgrade FastAPI version in requirements.txt if there are compatibility issues
-- Ensure all imports in main.py are properly handled with try/except blocks
-- Check that the application listens on 0.0.0.0 and uses the PORT environment variable
+### Python Version Compatibility Issues
+
+If you see errors like:
+```
+ValueError: 'not' is not a valid parameter
+```
+
+This is caused by incompatibility between Python 3.13 and older versions of FastAPI/Pydantic. To fix this:
+
+1. Use Python 3.11.9 as specified in runtime.txt
+2. Use compatible versions of FastAPI and Pydantic as specified in requirements.txt
 
 ### Compilation Error Fixes (httptools/parser/parser.c:212:12: fatal error)
 
@@ -97,7 +105,7 @@ error: command '/usr/bin/gcc' failed with exit code 1
 This is caused by trying to compile C extensions during installation. To fix this:
 
 1. Use the specific versions in requirements.txt (already set in this repo)
-2. Use Python 3.9.15 as specified in runtime.txt
+2. Use Python 3.11.9 as specified in runtime.txt
 3. If the issue persists, try adding these build dependencies to your Render environment:
    ```
    apt-get update && apt-get install -y build-essential python3-dev
