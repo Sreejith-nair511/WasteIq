@@ -14,7 +14,7 @@ Create a single Python FastAPI project that:
 
 ## ⚙️ Tech Stack
 
-- Python 3.11+
+- Python 3.9.15
 - FastAPI
 - Uvicorn
 - Pydantic
@@ -84,6 +84,24 @@ Common fixes:
 - Downgrade FastAPI version in requirements.txt if there are compatibility issues
 - Ensure all imports in main.py are properly handled with try/except blocks
 - Check that the application listens on 0.0.0.0 and uses the PORT environment variable
+
+### Compilation Error Fixes (httptools/parser/parser.c:212:12: fatal error)
+
+If you see errors like:
+```
+httptools/parser/parser.c:212:12: fatal error: longintrepr.h: No such file or directory
+compilation terminated.
+error: command '/usr/bin/gcc' failed with exit code 1
+```
+
+This is caused by trying to compile C extensions during installation. To fix this:
+
+1. Use the specific versions in requirements.txt (already set in this repo)
+2. Use Python 3.9.15 as specified in runtime.txt
+3. If the issue persists, try adding these build dependencies to your Render environment:
+   ```
+   apt-get update && apt-get install -y build-essential python3-dev
+   ```
 
 ## 🧩 Endpoints
 
