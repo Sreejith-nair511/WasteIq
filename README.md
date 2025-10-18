@@ -57,7 +57,7 @@ uvicorn main:app --reload
 5. Configure the service:
    - Name: wasteiq-backend
    - Environment: Python 3
-   - Build command: `pip install -r requirements.txt`
+   - Build command: `./build.sh`
    - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - Auto-deploy: Yes
 6. Click "Create Web Service"
